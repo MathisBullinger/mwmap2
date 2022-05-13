@@ -1,0 +1,11 @@
+{
+  "name": "mwmap2",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "devDependencies": {
+    "@parcel/transformer-glsl": "^2.5.0",
+    "parcel": "^2.5.0"
+  }
+}
