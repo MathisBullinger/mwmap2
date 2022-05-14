@@ -111,7 +111,7 @@ export class VertexArray {
       const el = layout.get(i)
       this.gl.vertexAttribPointer(
         i,
-        layout.size(),
+        el.count,
         el.type,
         el.normalized ?? false,
         layout.getStride(),
