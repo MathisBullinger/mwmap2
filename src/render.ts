@@ -33,7 +33,7 @@ export function translate(translation: Vector) {
 }
 
 export function zoom(n: number) {
-  view = Matrix.scale(new Vector<3>(1 + n, 1 + n, 1)).multiply(view)
+  view = Matrix.translate(new Vector<3>(0, 0, n)).multiply(view)
   render()
 }
 
