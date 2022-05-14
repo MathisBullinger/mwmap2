@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    "strict": true,
     "isolatedModules": true,
-    "typeRoots": ["./src/types"]
+    "typeRoots": ["./src/types"],
+    "lib": ["ESNext", "DOM"]
   }
 }
