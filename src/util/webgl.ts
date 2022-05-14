@@ -1,4 +1,5 @@
 import * as assert from './assert'
+import Matrix from '../math/matrix'
 
 export class Shader {
   constructor(
@@ -62,11 +63,28 @@ export class Program {
     return this.attributeLocations.get(attribute)!
   }
 
+  public getUniform(name: string): WebGLUniformLocation | null {
+    if (!this.uniformLocations.has(name))
+      this.uniformLocations.set(
+        name,
+        this.gl.getUniformLocation(this.program, name)
+      )
+    return this.uniformLocations.get(name)!
+  }
+
+  public passMatrix(name: string, matrix: Matrix) {
+    this.gl.uniformMatrix4fv(this.getUniform(name), false, matrix.values)
+  }
+
   public use() {
     this.gl.useProgram(this.program)
   }
 
   private readonly attributeLocations = new Map<string, number>()
+  private readonly uniformLocations = new Map<
+    string,
+    WebGLUniformLocation | null
+  >()
   private readonly program: WebGLProgram
 }
 
