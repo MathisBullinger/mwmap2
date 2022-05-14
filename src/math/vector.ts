@@ -1,3 +1,5 @@
+import type { SizedArray } from '../util/types'
+
 export default class Vector<T extends number = number> {
   constructor(...values: SizedArray<T>) {
     this.values = values
@@ -11,7 +13,7 @@ export default class Vector<T extends number = number> {
     const result = new Vector<0>()
     for (let i = 0; i < dimensions; i++)
       result.values.push(vector?.values[i] ?? fill)
-    return result
+    return result as Vector<T>
   }
 
   public add(rhs: Vector<T>): Vector<T> {
@@ -38,13 +40,7 @@ export default class Vector<T extends number = number> {
   public divide = (n: number): Vector<T> => this.multiply(1 / n)
 
   public readonly values: number[]
-  public get dimensions() {
-    return this.values.length
+  public get dimensions(): T {
+    return this.values.length as T
   }
 }
-
-type SizedArray<N extends number, T extends number[] = []> = SizeOf<T> extends N
-  ? T
-  : SizedArray<N, [...T, number]>
-
-type SizeOf<T extends unknown[]> = T extends { length: infer I } ? I : never

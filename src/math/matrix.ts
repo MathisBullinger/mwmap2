@@ -1,10 +1,11 @@
 import Vector from './vector'
 import { assert } from '../util/assert'
+import type { Add } from '../util/types'
 
-export default class Matrix {
+export default class Matrix<R extends number, C extends number> {
   constructor(
-    public readonly rows: number,
-    public readonly columns: number,
+    public readonly rows: R,
+    public readonly columns: C,
     values: number[] = []
   ) {
     if (values.length) assert(values.length === rows * columns)
@@ -18,21 +19,88 @@ export default class Matrix {
         this.values[i * columns + i] = 1
   }
 
-  public translate(translation: Vector) {
-    for (let i = 0; i < this.columns; i++) {
-      this.values[(this.rows - 1) * this.columns + i] +=
-        translation.values[i] ?? 0
-    }
+  public fill(n: number): Matrix<R, C> {
+    this.values.fill(n)
+    return this
   }
 
-  public scale(factor: Vector | number) {
-    const vec =
-      typeof factor === 'number'
-        ? Vector.from(Math.min(this.columns, this.rows), null, factor)
-        : factor
+  static translate<T extends number>(
+    translation: Vector<T>
+  ): Matrix<Add<T, 1>, Add<T, 1>> {
+    const result = new Matrix(
+      translation.dimensions + 1,
+      translation.dimensions + 1
+    )
 
-    for (let i = 0; i < Math.min(this.columns, this.rows); i++)
-      this.values[i * this.columns + i] *= vec.values[i] ?? 1
+    for (let i = 0; i < translation.dimensions; i++)
+      result.set(result.columns - 1, i, translation.values[i])
+
+    return result as any
+  }
+
+  static scale<T extends number>(
+    scaling: Vector<T>
+  ): Matrix<Add<T, 1>, Add<T, 1>> {
+    const result = new Matrix(scaling.dimensions + 1, scaling.dimensions + 1)
+
+    for (let i = 0; i < scaling.dimensions; i++)
+      result.set(i, i, scaling.values[i])
+
+    return result as any
+  }
+
+  public multiply<BC extends number>(rhs: Matrix<C, BC>): Matrix<R, BC> {
+    assert(
+      this.rows === (rhs.columns as any),
+      () =>
+        `matrices must have compatible sizes for multiplication\n${this.toString()}\n${rhs.toString()}`
+    )
+    const result = new Matrix(this.rows, rhs.columns).fill(0)
+
+    for (let rowA = 0; rowA < this.rows; rowA++) {
+      for (let columnB = 0; columnB < rhs.columns; columnB++) {
+        for (let i = 0; i < this.columns; i++) {
+          result.set(
+            rowA,
+            columnB,
+            result.at(rowA, columnB) + this.at(rowA, i) * rhs.at(i, columnB)
+          )
+        }
+      }
+    }
+
+    return result
+  }
+
+  public at(row: number, column: number): number {
+    assert(row * this.columns + column < this.values.length)
+    return this.values[row * this.columns + column]
+  }
+
+  public set(row: number, column: number, value: number) {
+    assert(row * this.columns + column < this.values.length)
+    this.values[row * this.columns + column] = value
+  }
+
+  public toString() {
+    let longest = ''
+    const rows = [...Array(this.rows)].map((_, row) =>
+      [...this.values]
+        .slice(row * this.columns, (row + 1) * this.columns)
+        .map((n) => {
+          const str = n.toString()
+          if (str.length > longest.length) longest = str
+          return str
+        })
+    )
+    return `Matrix<${this.rows}, ${this.columns}>(\n${rows
+      .map(
+        (row) =>
+          `  ${row
+            .map((v) => ' '.repeat(longest.length - v.length) + v)
+            .join(', ')}`
+      )
+      .join('\n')}\n)`
   }
 
   public readonly values: Float32Array
