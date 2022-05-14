@@ -2,7 +2,7 @@ import { Program, VertexBuffer, BufferLayout, VertexArray } from './util/webgl'
 import * as assert from './util/assert'
 import Matrix from './math/matrix'
 import Vector from './math/vector'
-import { orthogonal } from './math/projection'
+import { perspective } from './math/projection'
 
 import vertexShaderSource from './shaders/map.vert'
 import fragmentShaderSource from './shaders/map.frag'
@@ -34,11 +34,13 @@ vao.addBuffer(
     .push({ count: 2, type: gl.FLOAT })
 )
 
-const view = new Matrix(4, 4)
-let projection = getProjection()
-
 export function translate(translation: Vector) {
   view.translate(translation)
+  render()
+}
+
+export function zoom(n: number) {
+  view.translate(new Vector<3>(0, 0, n))
   render()
 }
 
@@ -78,15 +80,11 @@ export function afterResize() {
   render()
 }
 
-function getProjection() {
-  return orthogonal({
-    center: [0, 0],
-    width: Math.max(gl.canvas.width / gl.canvas.height, 1) * 2,
-    height: Math.max(gl.canvas.height / gl.canvas.width, 1) * 2,
-    near: 0,
-    far: 1,
-  })
-}
+const getProjection = () =>
+  perspective(90, gl.canvas.width / gl.canvas.height, 0.01, 10)
+
+const view = new Matrix(4, 4)
+let projection = getProjection()
 
 let lastRenderRequest = 0
 let renderId = 0

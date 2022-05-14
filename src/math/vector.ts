@@ -5,7 +5,7 @@ export default class Vector<T extends number = number> {
 
   public static from<T extends number>(
     dimensions: T,
-    vector?: Vector,
+    vector?: Vector | null,
     fill = 0
   ): Vector<T> {
     const result = new Vector<0>()

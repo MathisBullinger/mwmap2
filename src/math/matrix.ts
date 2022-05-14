@@ -1,4 +1,4 @@
-import type Vector from './vector'
+import Vector from './vector'
 import { assert } from '../util/assert'
 
 export default class Matrix {
@@ -23,6 +23,16 @@ export default class Matrix {
       this.values[(this.rows - 1) * this.columns + i] +=
         translation.values[i] ?? 0
     }
+  }
+
+  public scale(factor: Vector | number) {
+    const vec =
+      typeof factor === 'number'
+        ? Vector.from(Math.min(this.columns, this.rows), null, factor)
+        : factor
+
+    for (let i = 0; i < Math.min(this.columns, this.rows); i++)
+      this.values[i * this.columns + i] *= vec.values[i] ?? 1
   }
 
   public readonly values: Float32Array
