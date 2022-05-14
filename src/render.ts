@@ -3,6 +3,7 @@ import * as assert from './util/assert'
 import Matrix from './math/matrix'
 import Vector from './math/vector'
 import { perspective } from './math/projection'
+import { gridMesh } from './util/mesh'
 
 import vertexShaderSource from './shaders/map.vert'
 import fragmentShaderSource from './shaders/map.frag'
@@ -15,32 +16,24 @@ const gl = assert.notNull(
 
 const program = new Program(gl, vertexShaderSource, fragmentShaderSource)
 
+const gridCoords = gridMesh(100, 100)
+console.log(`${gridCoords.length / 4} vertices`)
+
 const vao = new VertexArray(gl)
 vao.addBuffer(
-  new VertexBuffer(
-    gl,
-    // prettier-ignore
-    [
-      -1,  1,  0, 0,
-      -1, -1,  0, 1,
-       1, -1,  1, 1,
-       1, -1,  1, 1,
-       1,  1,  1, 0,
-      -1,  1,  0, 0
-    ]
-  ),
+  new VertexBuffer(gl, gridCoords),
   new BufferLayout(gl)
     .push({ count: 2, type: gl.FLOAT })
     .push({ count: 2, type: gl.FLOAT })
 )
 
 export function translate(translation: Vector) {
-  view.translate(translation)
+  view = Matrix.translate(Vector.from(3, translation)).multiply(view)
   render()
 }
 
 export function zoom(n: number) {
-  view.translate(new Vector<3>(0, 0, n))
+  view = Matrix.scale(new Vector<3>(1 + n, 1 + n, 1)).multiply(view)
   render()
 }
 
@@ -83,7 +76,10 @@ export function afterResize() {
 const getProjection = () =>
   perspective(90, gl.canvas.width / gl.canvas.height, 0.01, 10)
 
-const view = new Matrix(4, 4)
+let view = Matrix.translate(new Vector<3>(-0.5, -0.5, 0))
+  .multiply(Matrix.scale(new Vector<3>(2, 2, 1)))
+  .multiply(new Matrix(4, 4))
+
 let projection = getProjection()
 
 let lastRenderRequest = 0
@@ -93,7 +89,7 @@ function render_() {
   program.passMatrix('view', view)
   program.passMatrix('projection', projection)
   gl.clear(gl.COLOR_BUFFER_BIT)
-  gl.drawArrays(gl.TRIANGLES, 0, 6)
+  gl.drawArrays(gl.TRIANGLES, 0, gridCoords.length / 4)
 
   if (performance.now() - lastRenderRequest < 50)
     renderId = requestAnimationFrame(render_)
