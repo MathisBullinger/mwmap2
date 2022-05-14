@@ -1,5 +1,6 @@
 import * as assert from './assert'
 import Matrix from '../math/matrix'
+import memoize from 'facula/memoize'
 
 export class Shader {
   constructor(
@@ -54,23 +55,12 @@ export class Program {
       throw gl.getProgramInfoLog(this.program)
   }
 
-  public getLocation(attribute: string): number {
-    if (!this.attributeLocations.has(attribute))
-      this.attributeLocations.set(
-        attribute,
-        this.gl.getAttribLocation(this.program, attribute)
-      )
-    return this.attributeLocations.get(attribute)!
-  }
-
-  public getUniform(name: string): WebGLUniformLocation | null {
-    if (!this.uniformLocations.has(name))
-      this.uniformLocations.set(
-        name,
-        this.gl.getUniformLocation(this.program, name)
-      )
-    return this.uniformLocations.get(name)!
-  }
+  public getLocation = memoize((attribute: string) =>
+    this.gl.getAttribLocation(this.program, attribute)
+  )
+  public getUniform = memoize((name: string) =>
+    this.gl.getUniformLocation(this.program, name)
+  )
 
   public passMatrix(name: string, matrix: Matrix) {
     this.gl.uniformMatrix4fv(this.getUniform(name), false, matrix.values)
@@ -80,11 +70,6 @@ export class Program {
     this.gl.useProgram(this.program)
   }
 
-  private readonly attributeLocations = new Map<string, number>()
-  private readonly uniformLocations = new Map<
-    string,
-    WebGLUniformLocation | null
-  >()
   private readonly program: WebGLProgram
 }
 

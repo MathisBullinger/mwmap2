@@ -1,3 +1,4 @@
+import type Vector from './vector'
 import { assert } from '../util/assert'
 
 export default class Matrix {
@@ -15,6 +16,13 @@ export default class Matrix {
     if (!values.length)
       for (let i = 0; i < Math.min(rows, columns); i++)
         this.values[i * columns + i] = 1
+  }
+
+  public translate(translation: Vector) {
+    for (let i = 0; i < this.columns; i++) {
+      this.values[(this.rows - 1) * this.columns + i] +=
+        translation.values[i] ?? 0
+    }
   }
 
   public readonly values: Float32Array
