@@ -37,7 +37,7 @@ export function zoom(n: number) {
   render()
 }
 
-gl.clearColor(0.2, 0.2, 0.2, 1)
+gl.clearColor(0.1, 0.1, 0.1, 1)
 gl.enable(gl.DEPTH_TEST)
 
 program.use()
@@ -86,7 +86,7 @@ let projection = getProjection()
 let lastRenderRequest = 0
 let renderId = 0
 
-const lightPos = new Vector<3>(0, 0, 0)
+const lightPos = new Vector<3>(0, -2, 2)
 gl.uniform3fv(
   program.getUniform('lightPos')!,
   new Float32Array(lightPos.values)
