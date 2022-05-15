@@ -6,7 +6,7 @@ import { perspective } from './math/projection'
 import { gridMesh } from './util/mesh'
 
 import vertexShaderSource from './shaders/map.vert'
-import fragmentShaderSource from './shaders/normal.frag'
+import fragmentShaderSource from './shaders/map.frag'
 
 export const canvas = document.querySelector<HTMLCanvasElement>('canvas')!
 const gl = assert.notNull(
@@ -37,7 +37,8 @@ export function zoom(n: number) {
   render()
 }
 
-gl.clearColor(0, 0, 0, 1)
+gl.clearColor(0.2, 0.2, 0.2, 1)
+gl.enable(gl.DEPTH_TEST)
 
 program.use()
 vao.bind()
@@ -76,7 +77,7 @@ export function afterResize() {
 const getProjection = () =>
   perspective(90, gl.canvas.width / gl.canvas.height, 0.01, 10)
 
-let model = Matrix.translate(new Vector<3>(-0.5, -0.5, 0))
+export let model = Matrix.translate(new Vector<3>(-0.5, -0.5, 0))
   .multiply(Matrix.scale(new Vector<3>(2, 2, 1)))
   .multiply(new Matrix(4, 4))
 
@@ -94,7 +95,7 @@ gl.uniform3fv(
 function render_() {
   program.passMatrix('model', model)
   program.passMatrix('projection', projection)
-  gl.clear(gl.COLOR_BUFFER_BIT)
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   gl.drawArrays(gl.TRIANGLES, 0, gridCoords.length / 4)
 
   if (performance.now() - lastRenderRequest < 50)

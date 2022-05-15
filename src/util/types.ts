@@ -19,3 +19,15 @@ type AppendArray<A extends unknown[], B extends unknown[]> = B extends [
 export type Add<A extends number, B extends number> = SizeOf<
   AppendArray<SizedArray<A>, SizedArray<B>>
 >
+
+export type Subtract<A extends number, B extends number> = SubtractHelper<
+  SizedArray<A>,
+  SizedArray<B>
+>
+
+type SubtractHelper<A extends unknown[], B extends unknown[]> = B extends [
+  infer H,
+  ...infer T
+]
+  ? SubtractHelper<A extends [infer _, ...infer AT] ? AT : never, T>
+  : SizeOf<A>

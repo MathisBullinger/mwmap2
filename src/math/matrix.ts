@@ -1,6 +1,6 @@
 import Vector from './vector'
 import { assert } from '../util/assert'
-import type { Add } from '../util/types'
+import type { Add, Subtract } from '../util/types'
 
 export default class Matrix<R extends number, C extends number> {
   constructor(
@@ -36,6 +36,13 @@ export default class Matrix<R extends number, C extends number> {
       result.set(result.columns - 1, i, translation.values[i])
 
     return result as any
+  }
+
+  getTranslation(): Vector<Subtract<C, 1>> {
+    const values = [...Array(this.columns - 1)].map((_, c) =>
+      this.at(this.rows - 1, c)
+    )
+    return new Vector(...(values as [])) as any
   }
 
   static scale<T extends number>(

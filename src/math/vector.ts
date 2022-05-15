@@ -43,4 +43,14 @@ export default class Vector<T extends number = number> {
   public get dimensions(): T {
     return this.values.length as T
   }
+
+  public get x() {
+    return this.values[0]
+  }
+  public get y() {
+    return this.values[1]
+  }
+  public get z() {
+    return this.values[2]
+  }
 }
