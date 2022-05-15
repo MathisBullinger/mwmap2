@@ -6,7 +6,7 @@ import { perspective } from './math/projection'
 import { gridMesh } from './util/mesh'
 
 import vertexShaderSource from './shaders/map.vert'
-import fragmentShaderSource from './shaders/map.frag'
+import fragmentShaderSource from './shaders/normal.frag'
 
 export const canvas = document.querySelector<HTMLCanvasElement>('canvas')!
 const gl = assert.notNull(
@@ -28,12 +28,12 @@ vao.addBuffer(
 )
 
 export function translate(translation: Vector) {
-  view = Matrix.translate(Vector.from(3, translation)).multiply(view)
+  model = Matrix.translate(Vector.from(3, translation)).multiply(model)
   render()
 }
 
 export function zoom(n: number) {
-  view = Matrix.translate(new Vector<3>(0, 0, n)).multiply(view)
+  model = Matrix.translate(new Vector<3>(0, 0, n)).multiply(model)
   render()
 }
 
@@ -76,7 +76,7 @@ export function afterResize() {
 const getProjection = () =>
   perspective(90, gl.canvas.width / gl.canvas.height, 0.01, 10)
 
-let view = Matrix.translate(new Vector<3>(-0.5, -0.5, 0))
+let model = Matrix.translate(new Vector<3>(-0.5, -0.5, 0))
   .multiply(Matrix.scale(new Vector<3>(2, 2, 1)))
   .multiply(new Matrix(4, 4))
 
@@ -85,8 +85,14 @@ let projection = getProjection()
 let lastRenderRequest = 0
 let renderId = 0
 
+const lightPos = new Vector<3>(0, 0, 0)
+gl.uniform3fv(
+  program.getUniform('lightPos')!,
+  new Float32Array(lightPos.values)
+)
+
 function render_() {
-  program.passMatrix('view', view)
+  program.passMatrix('model', model)
   program.passMatrix('projection', projection)
   gl.clear(gl.COLOR_BUFFER_BIT)
   gl.drawArrays(gl.TRIANGLES, 0, gridCoords.length / 4)

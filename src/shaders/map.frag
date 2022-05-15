@@ -3,6 +3,7 @@
 precision highp float;
 
 uniform sampler2D uHeightMap;
+uniform vec3 lightPos;
 
 in vec2 texCoord;
 

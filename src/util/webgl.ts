@@ -62,7 +62,7 @@ export class Program {
     this.gl.getUniformLocation(this.program, name)
   )
 
-  public passMatrix(name: string, matrix: Matrix) {
+  public passMatrix(name: string, matrix: Matrix<4, 4>) {
     this.gl.uniformMatrix4fv(this.getUniform(name), false, matrix.values)
   }
 
